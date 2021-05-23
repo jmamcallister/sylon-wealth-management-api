@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml" />
+    <!-- WireMock -->
+    <logger name="WireMock" level="WARN" />
+    <logger name="org.eclipse.jetty" level="WARN" />
+    <logger name="wiremock.org.eclipse.jetty.server" level="WARN" />
+    <logger name="org.eclipse.jetty.server.handler.ContextHandler" level="WARN" />
+    <!-- Spring http framework -->
+    <logger name="reactor.netty" level="INFO" />
+    <logger name="org.springframework.web" level="INFO" />
+    <!-- Application -->
+    <logger name="io.sylon" level="DEBUG" />
+</configuration>
