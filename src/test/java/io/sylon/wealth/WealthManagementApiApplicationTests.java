@@ -56,4 +56,64 @@ class WealthManagementApiApplicationTests {
         .exchange()
         .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
   }
+
+  @Test
+  void watchlist_create_givenDefaultWatchlistName_shouldReturnConflict() throws Exception {
+
+  }
+
+  @Test
+  void watchlist_create_givenExistingWatchlistName_shouldReturnConflict() throws Exception {
+
+  }
+
+  @Test
+  void watchlist_create_givenNewWatchlistName_shouldReturnNewWatchlistId() throws Exception {
+
+  }
+
+  @Test
+  void watchlist_get_givenNoWatchlistsAddedByUser_shouldReturnDefaultEmptyWatchlist() throws Exception {
+
+  }
+
+  @Test
+  void watchlist_get_givenGoodRequest_shouldReturnUsersWatchlists() throws Exception {
+
+  }
+
+  @Test
+  void watchlist_get_givenNonExistentWatchlistId_shouldReturnNotFound() throws Exception {
+
+  }
+
+  @Test
+  void watchlist_update_givenNewSymbolAndExistingWatchlist_shouldReturnSuccess() throws Exception {
+
+  }
+
+  @Test
+  void watchlist_update_givenNonExistentWatchlist_shouldReturnNotFound() throws Exception {
+
+  }
+
+  @Test
+  void watchlist_update_givenConflictingData_shouldReturnBadRequest() throws Exception {
+
+  }
+
+  @Test
+  void watchlist_delete_givenExistingWatchlist_shouldReturnNoContent() throws Exception {
+
+  }
+
+  @Test
+  void watchlist_deleteSymbol_givenExistingWatchlistAndExistingSymbol_shouldReturnNoContent() throws Exception {
+
+  }
+
+  @Test
+  void watchlist_deleteSymbol_givenNonExistingWatchlist_shouldReturnNotFound() throws Exception {
+
+  }
 }
