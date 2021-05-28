@@ -1,12 +1,16 @@
 package io.sylon.wealth;
 
+import io.sylon.wealth.model.dto.CreateWatchlistDto;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -26,6 +30,10 @@ class WealthManagementApiApplicationTests {
   @Autowired
   WebTestClient webTestClient;
 
+  @BeforeEach
+  void beforeEach() {
+    webTestClient = webTestClient.mutate().filter(basicAuthentication("test", "test")).build();
+  }
   @Test
   void search_givenGoodRequest_shouldReturnGoodResponse() throws Exception {
     stubFor(get(urlPathEqualTo("/query"))
@@ -33,8 +41,7 @@ class WealthManagementApiApplicationTests {
         .withQueryParam("keywords", equalTo("ACME"))
         .willReturn(aResponse().withStatus(HttpStatus.OK.value()).withBody(json(singleBackendSearchResponse("ACME", "Acme Corporation"))))
     );
-    webTestClient.mutate().filter(basicAuthentication("test", "test")).build()
-        .get()
+    webTestClient.get()
         .uri("/search?query=ACME")
         .exchange()
         .expectStatus().isOk()
@@ -50,8 +57,7 @@ class WealthManagementApiApplicationTests {
         .withQueryParam("keywords", equalTo("ACME"))
         .willReturn(aResponse().withStatus(HttpStatus.OK.value()).withBody(json(tooManyRequestsResponse())))
     );
-    webTestClient.mutate().filter(basicAuthentication("test", "test")).build()
-        .get()
+    webTestClient.get()
         .uri("/search?query=ACME")
         .exchange()
         .expectStatus().isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
@@ -59,7 +65,14 @@ class WealthManagementApiApplicationTests {
 
   @Test
   void watchlist_create_givenDefaultWatchlistName_shouldReturnConflict() throws Exception {
-
+    webTestClient.post()
+        .uri("/watchlists")
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(Mono.just(CreateWatchlistDto.builder().name("default").build()), CreateWatchlistDto.class)
+        .exchange()
+        .expectStatus().isEqualTo(HttpStatus.CONFLICT)
+        .expectBody()
+        .jsonPath("$.error").isEqualTo(HttpStatus.CONFLICT.getReasonPhrase());
   }
 
   @Test
@@ -69,12 +82,28 @@ class WealthManagementApiApplicationTests {
 
   @Test
   void watchlist_create_givenNewWatchlistName_shouldReturnNewWatchlistId() throws Exception {
-
+    webTestClient.post()
+        .uri("/watchlists")
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(Mono.just(CreateWatchlistDto.builder().name("New Watchlist").build()), CreateWatchlistDto.class)
+        .exchange()
+        .expectStatus().isEqualTo(HttpStatus.CREATED)
+        .expectBody()
+        .jsonPath("$.id").isNotEmpty();
   }
 
   @Test
   void watchlist_get_givenNoWatchlistsAddedByUser_shouldReturnDefaultEmptyWatchlist() throws Exception {
-
+    webTestClient.get()
+        .uri("/watchlists")
+        .exchange()
+        .expectStatus().isOk()
+        .expectBody()
+        .jsonPath("$.total").isEqualTo(1)
+        .jsonPath("$.watchlists").isArray()
+        .jsonPath("$.watchlists.length()").isEqualTo(1)
+        .jsonPath("$.watchlists[0].name").isEqualTo("default")
+        .jsonPath("$.watchlists[0].id").isNotEmpty();
   }
 
   @Test

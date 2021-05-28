@@ -12,7 +12,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Watchlist {
-  private long id;
+  private String id;
   private String name;
   private Set<String> watchlistItems;
 }

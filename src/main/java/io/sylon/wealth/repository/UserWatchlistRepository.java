@@ -5,7 +5,7 @@ import io.sylon.wealth.model.core.Watchlist;
 import java.util.List;
 
 public interface UserWatchlistRepository {
-  void addWatchlist(String user, String watchlistName);
+  Watchlist addWatchlist(String user, Watchlist watchlist);
   void addSymbolToWatchlist(String user, String watchlistName, String symbol);
   void removeWatchlist(String user, String watchlistName);
   void removeSymbolFromWatchlist(String user, String watchlistName, String symbol);

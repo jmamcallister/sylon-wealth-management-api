@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
@@ -15,12 +16,14 @@ public class InMemoryUserWatchlistRepository implements UserWatchlistRepository 
   private final ConcurrentHashMap<String, List<Watchlist>> userWatchlists = new ConcurrentHashMap<>();
 
   @Override
-  public void addWatchlist(String user, String watchlistName) {
+  public Watchlist addWatchlist(String user, Watchlist watchlist) {
     List<Watchlist> watchlists = getOrProvisionWatchlists(user);
-    if ( watchlists.stream().anyMatch(watchlist -> watchlistName.equals(watchlist.getName())) ) {
-      throw new DuplicateWatchlistNameException(String.format("Watchlist with name %s already exists", watchlistName));
+    if ( watchlists.stream().anyMatch(w -> watchlist.getName().equals(w.getName())) ) {
+      throw new DuplicateWatchlistNameException(String.format("Watchlist with name %s already exists", watchlist.getName()));
     }
-    watchlists.add(newWatchlist(watchlistName));
+    Watchlist newWatchlist = newWatchlist(watchlist.getName());
+    watchlists.add(newWatchlist(watchlist.getName()));
+    return newWatchlist;
   }
 
   @Override
@@ -50,13 +53,14 @@ public class InMemoryUserWatchlistRepository implements UserWatchlistRepository 
   private List<Watchlist> getOrProvisionWatchlists(String user) {
     List<Watchlist> watchlists = userWatchlists.get(user);
     if (watchlists == null || watchlists.isEmpty()) {
-      provisionNewUserWatchlists(user);
+      watchlists = provisionNewUserWatchlists(user);
     }
     return watchlists;
   }
 
-  private void provisionNewUserWatchlists(String user) {
+  private List<Watchlist> provisionNewUserWatchlists(String user) {
     userWatchlists.put(user, newDefaultWatchlist());
+    return userWatchlists.get(user);
   }
 
   private List<Watchlist> newDefaultWatchlist() {
@@ -66,6 +70,6 @@ public class InMemoryUserWatchlistRepository implements UserWatchlistRepository 
   }
 
   private Watchlist newWatchlist(String name) {
-    return Watchlist.builder().name(name).watchlistItems(new HashSet<>()).build();
+    return Watchlist.builder().id(UUID.randomUUID().toString()).name(name).watchlistItems(new HashSet<>()).build();
   }
 }

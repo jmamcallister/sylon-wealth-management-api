@@ -11,8 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class WatchlistDto {
-
+public class CreateWatchlistResponse {
   private String id;
-  private String name;
 }
