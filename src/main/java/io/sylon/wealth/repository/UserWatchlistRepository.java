@@ -7,8 +7,9 @@ import java.util.List;
 public interface UserWatchlistRepository {
   Watchlist addWatchlist(String user, Watchlist watchlist);
   void addSymbolToWatchlist(String user, String watchlistName, String symbol);
-  void removeWatchlist(String user, String watchlistName);
+  void removeWatchlist(String user, String id);
   void removeSymbolFromWatchlist(String user, String watchlistName, String symbol);
   List<Watchlist> getWatchlists(String user);
   Watchlist getWatchlistByName(String user, String watchlistName);
+  Watchlist getWatchlistById(String user, String id);
 }

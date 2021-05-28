@@ -3,12 +3,14 @@ package io.sylon.wealth.service;
 import io.sylon.wealth.model.core.Watchlist;
 import io.sylon.wealth.model.dto.CreateWatchlistDto;
 import io.sylon.wealth.model.dto.CreateWatchlistResponse;
+import io.sylon.wealth.model.dto.WatchlistDetailResponse;
 import io.sylon.wealth.model.dto.WatchlistDto;
 import io.sylon.wealth.model.dto.WatchlistsResponse;
 import io.sylon.wealth.repository.UserWatchlistRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +35,18 @@ public class WatchlistService {
   public CreateWatchlistResponse createWatchlist(String user, CreateWatchlistDto createWatchlistDto) {
     Watchlist newWatchlist = repository.addWatchlist(user, mapDtoToEntity(createWatchlistDto));
     return CreateWatchlistResponse.builder().id(newWatchlist.getId()).build();
+  }
+
+  public WatchlistDetailResponse getWatchlistById(String user, String id) {
+    return mapEntityToDto(repository.getWatchlistById(user, id));
+  }
+
+  private WatchlistDetailResponse mapEntityToDto(Watchlist watchlist) {
+    return WatchlistDetailResponse.builder()
+        .id(watchlist.getId())
+        .name(watchlist.getName())
+        .symbols(new ArrayList<>(watchlist.getWatchlistItems()))
+        .build();
   }
 
   private List<WatchlistDto> mapEntityToDto(List<Watchlist> watchlists) {

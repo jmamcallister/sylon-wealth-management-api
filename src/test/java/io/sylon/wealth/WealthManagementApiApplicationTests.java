@@ -1,6 +1,8 @@
 package io.sylon.wealth;
 
 import io.sylon.wealth.model.dto.CreateWatchlistDto;
+import io.sylon.wealth.model.dto.WatchlistDto;
+import io.sylon.wealth.model.dto.WatchlistsResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +11,11 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -20,6 +25,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static io.sylon.wealth.util.TestData.json;
 import static io.sylon.wealth.util.TestData.singleBackendSearchResponse;
 import static io.sylon.wealth.util.TestData.tooManyRequestsResponse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
 
 @ActiveProfiles("test")
@@ -34,6 +42,7 @@ class WealthManagementApiApplicationTests {
   void beforeEach() {
     webTestClient = webTestClient.mutate().filter(basicAuthentication("test", "test")).build();
   }
+
   @Test
   void search_givenGoodRequest_shouldReturnGoodResponse() throws Exception {
     stubFor(get(urlPathEqualTo("/query"))
@@ -112,8 +121,42 @@ class WealthManagementApiApplicationTests {
   }
 
   @Test
-  void watchlist_get_givenNonExistentWatchlistId_shouldReturnNotFound() throws Exception {
+  void watchlist_getById_givenNonExistentWatchlistId_shouldReturnNotFound() throws Exception {
+    webTestClient.get()
+        .uri("/watchlists/{id}", "a-fake-id")
+        .exchange()
+        .expectStatus().isNotFound()
+        .expectBody()
+        .jsonPath("$.errorMessage").isEqualTo("Watchlist with id a-fake-id not found");
+  }
 
+  @Test
+  void watchlist_getById_givenNewDefaultWatchlistId_shouldReturnWatchlistWithNoSymbols() throws Exception {
+    EntityExchangeResult<WatchlistsResponse> result = webTestClient.get()
+        .uri("/watchlists")
+        .exchange()
+        .expectStatus().isOk()
+        .expectBody(WatchlistsResponse.class)
+        .returnResult();
+
+    WatchlistsResponse watchlistsResponse = result.getResponseBody();
+    assertNotNull(watchlistsResponse);
+    List<WatchlistDto> watchlists = result.getResponseBody().getWatchlists();
+    assertNotNull(watchlists);
+    assertFalse(watchlists.isEmpty());
+    assertEquals(1, watchlists.size());
+    String id = watchlists.get(0).getId();
+    assertNotNull(id);
+
+    webTestClient.get()
+        .uri("/watchlists/{id}", id)
+        .exchange()
+        .expectStatus().isOk()
+        .expectBody()
+        .jsonPath("$.id").isEqualTo(id)
+        .jsonPath("$.name").isEqualTo("default")
+        .jsonPath("$.symbols").isArray()
+        .jsonPath("$.symbols").isEmpty();
   }
 
   @Test

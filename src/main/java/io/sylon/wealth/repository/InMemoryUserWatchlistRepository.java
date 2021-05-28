@@ -1,6 +1,8 @@
 package io.sylon.wealth.repository;
 
 import io.sylon.wealth.exception.DuplicateWatchlistNameException;
+import io.sylon.wealth.exception.DuplicateWatchlistsFoundException;
+import io.sylon.wealth.exception.WatchlistNotFoundException;
 import io.sylon.wealth.model.core.Watchlist;
 import org.springframework.stereotype.Repository;
 
@@ -9,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Repository
 public class InMemoryUserWatchlistRepository implements UserWatchlistRepository {
@@ -31,8 +34,14 @@ public class InMemoryUserWatchlistRepository implements UserWatchlistRepository 
   }
 
   @Override
-  public void removeWatchlist(String user, String watchlistName) {
-
+  public void removeWatchlist(String user, String id) {
+    List<Watchlist> watchlists = userWatchlists.get(user);
+    if (watchlists == null || watchlists.isEmpty()) {
+      throw new WatchlistNotFoundException(String.format("Watchlist with id %s not found", id));
+    }
+    if (!watchlists.removeIf(w -> id.equals(w.getId()))) {
+      throw new WatchlistNotFoundException(String.format("Watchlist with id %s not found", id));
+    }
   }
 
   @Override
@@ -48,6 +57,22 @@ public class InMemoryUserWatchlistRepository implements UserWatchlistRepository 
   @Override
   public Watchlist getWatchlistByName(String user, String watchlistName) {
     return null;
+  }
+
+  @Override
+  public Watchlist getWatchlistById(String user, String id) {
+    List<Watchlist> watchlists = userWatchlists.get(user);
+    if (watchlists == null || watchlists.isEmpty()) {
+      throw new WatchlistNotFoundException(String.format("Watchlist with id %s not found", id));
+    }
+    watchlists = watchlists.stream().filter(w -> id.equals(w.getId())).collect(Collectors.toList());
+    if (watchlists.isEmpty()) {
+      throw new WatchlistNotFoundException(String.format("Watchlist with id %s not found", id));
+    }
+    if (watchlists.size() > 1) {
+      throw new DuplicateWatchlistsFoundException(String.format("Multiple watchlists with id %s found", id));
+    }
+    return watchlists.get(0);
   }
 
   private List<Watchlist> getOrProvisionWatchlists(String user) {
