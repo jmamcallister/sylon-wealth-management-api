@@ -4,6 +4,7 @@ import io.sylon.wealth.exception.DuplicateWatchlistNameException;
 import io.sylon.wealth.exception.DuplicateWatchlistsFoundException;
 import io.sylon.wealth.exception.WatchlistNotFoundException;
 import io.sylon.wealth.model.core.Watchlist;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Repository
+@Slf4j
 public class InMemoryUserWatchlistRepository implements UserWatchlistRepository {
 
   private final ConcurrentHashMap<String, List<Watchlist>> userWatchlists = new ConcurrentHashMap<>();
@@ -80,6 +82,7 @@ public class InMemoryUserWatchlistRepository implements UserWatchlistRepository 
     if (watchlists == null || watchlists.isEmpty()) {
       watchlists = provisionNewUserWatchlists(user);
     }
+    log.debug("Watchlists for user {} - {}", user, watchlists);
     return watchlists;
   }
 

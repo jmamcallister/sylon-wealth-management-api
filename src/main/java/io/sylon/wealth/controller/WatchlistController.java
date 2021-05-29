@@ -8,6 +8,8 @@ import io.sylon.wealth.service.WatchlistService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,5 +45,12 @@ public class WatchlistController {
   public CreateWatchlistResponse createWatchlist(@RequestBody CreateWatchlistDto createWatchlistDto, Principal principal) {
     log.debug("User: {}", principal.getName());
     return watchlistService.createWatchlist(principal.getName(), createWatchlistDto);
+  }
+
+  @DeleteMapping ("/watchlists/{id}")
+  @ResponseStatus (HttpStatus.NO_CONTENT)
+  public ResponseEntity<?> deleteWatchlist(@PathVariable String id, Principal principal) {
+    watchlistService.deleteWatchlistById(principal.getName(), id);
+    return ResponseEntity.noContent().build();
   }
 }

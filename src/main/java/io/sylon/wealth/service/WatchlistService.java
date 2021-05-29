@@ -41,6 +41,10 @@ public class WatchlistService {
     return mapEntityToDto(repository.getWatchlistById(user, id));
   }
 
+  public void deleteWatchlistById(String user, String id) {
+    repository.removeWatchlist(user, id);
+  }
+
   private WatchlistDetailResponse mapEntityToDto(Watchlist watchlist) {
     return WatchlistDetailResponse.builder()
         .id(watchlist.getId())

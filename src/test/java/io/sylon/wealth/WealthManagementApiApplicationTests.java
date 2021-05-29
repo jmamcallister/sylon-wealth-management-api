@@ -10,7 +10,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -34,7 +33,6 @@ import static org.springframework.web.reactive.function.client.ExchangeFilterFun
 @ActiveProfiles("test")
 @AutoConfigureWireMock(port=0)
 @SpringBootTest (webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class WealthManagementApiApplicationTests {
 
   @Autowired
@@ -105,6 +103,8 @@ class WealthManagementApiApplicationTests {
 
   @Test
   void watchlist_get_givenNoWatchlistsAddedByUser_shouldReturnDefaultEmptyWatchlist() throws Exception {
+    deleteAllWatchlists();
+
     webTestClient.get()
         .uri("/watchlists")
         .exchange()
@@ -134,6 +134,8 @@ class WealthManagementApiApplicationTests {
 
   @Test
   void watchlist_getById_givenNewDefaultWatchlistId_shouldReturnWatchlistWithNoSymbols() throws Exception {
+    deleteAllWatchlists();
+
     EntityExchangeResult<WatchlistsResponse> result = webTestClient.get()
         .uri("/watchlists")
         .exchange()
@@ -189,5 +191,24 @@ class WealthManagementApiApplicationTests {
   @Test
   void watchlist_deleteSymbol_givenNonExistingWatchlist_shouldReturnNotFound() throws Exception {
 
+  }
+
+  private void deleteAllWatchlists() {
+    EntityExchangeResult<WatchlistsResponse> result = webTestClient.get()
+        .uri("/watchlists")
+        .exchange()
+        .expectStatus().isOk()
+        .expectBody(WatchlistsResponse.class)
+        .returnResult();
+
+    WatchlistsResponse watchlistsResponse = result.getResponseBody();
+    assertNotNull(watchlistsResponse);
+    List<WatchlistDto> watchlists = result.getResponseBody().getWatchlists();
+
+    watchlists.parallelStream().forEach(w -> webTestClient.delete()
+        .uri("/watchlists/{id}", w.getId())
+        .exchange()
+        .expectStatus().isNoContent()
+    );
   }
 }
