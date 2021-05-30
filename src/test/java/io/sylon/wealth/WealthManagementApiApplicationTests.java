@@ -1,6 +1,7 @@
 package io.sylon.wealth;
 
 import io.sylon.wealth.model.dto.CreateWatchlistDto;
+import io.sylon.wealth.model.dto.UpdateWatchlistDto;
 import io.sylon.wealth.model.dto.WatchlistDto;
 import io.sylon.wealth.model.dto.WatchlistsResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -165,22 +166,73 @@ class WealthManagementApiApplicationTests {
 
   @Test
   void watchlist_update_givenNewSymbolAndExistingWatchlist_shouldReturnSuccess() throws Exception {
+    deleteAllWatchlists();
+    WatchlistsResponse watchlistsResponse = getAllWatchlists();
 
+    assertNotNull(watchlistsResponse);
+    List<WatchlistDto> watchlists = watchlistsResponse.getWatchlists();
+    assertNotNull(watchlists);
+    assertFalse(watchlists.isEmpty());
+    assertEquals(1, watchlists.size());
+    String id = watchlists.get(0).getId();
+    assertNotNull(id);
+
+    webTestClient.put()
+        .uri("/watchlists/{id}", id)
+        .body(Mono.just(UpdateWatchlistDto.builder().symbols(List.of("GME")).build()), UpdateWatchlistDto.class)
+        .exchange()
+        .expectStatus().isOk();
+
+    getAllWatchlists();
+
+    // Idempotent
+    webTestClient.put()
+        .uri("/watchlists/{id}", id)
+        .body(Mono.just(UpdateWatchlistDto.builder().symbols(List.of("GME")).build()), UpdateWatchlistDto.class)
+        .exchange()
+        .expectStatus().isOk();
+
+    getAllWatchlists();
   }
 
   @Test
   void watchlist_update_givenNonExistentWatchlist_shouldReturnNotFound() throws Exception {
+    deleteAllWatchlists();
 
-  }
-
-  @Test
-  void watchlist_update_givenConflictingData_shouldReturnBadRequest() throws Exception {
-
+    webTestClient.put()
+        .uri("/watchlists/{id}", "fake")
+        .body(Mono.just(UpdateWatchlistDto.builder().symbols(List.of("GME")).build()), UpdateWatchlistDto.class)
+        .exchange()
+        .expectStatus().isNotFound();
   }
 
   @Test
   void watchlist_delete_givenExistingWatchlist_shouldReturnNoContent() throws Exception {
+    deleteAllWatchlists();
+    WatchlistsResponse watchlistsResponse = getAllWatchlists();
 
+    assertNotNull(watchlistsResponse);
+    List<WatchlistDto> watchlists = watchlistsResponse.getWatchlists();
+    assertNotNull(watchlists);
+    assertFalse(watchlists.isEmpty());
+    assertEquals(1, watchlists.size());
+    String id = watchlists.get(0).getId();
+    assertNotNull(id);
+
+    webTestClient.delete()
+        .uri("/watchlists/{id}", id)
+        .exchange()
+        .expectStatus().isNoContent();
+  }
+
+  @Test
+  void watchlist_delete_givenNonExistingWatchlist_shouldReturnNotFound() throws Exception {
+    webTestClient.delete()
+        .uri("/watchlists/{id}", "not-a-real-id")
+        .exchange()
+        .expectStatus().isNotFound()
+        .expectBody()
+        .jsonPath("$.errorMessage").isEqualTo("Watchlist with id not-a-real-id not found");
   }
 
   @Test
@@ -191,6 +243,16 @@ class WealthManagementApiApplicationTests {
   @Test
   void watchlist_deleteSymbol_givenNonExistingWatchlist_shouldReturnNotFound() throws Exception {
 
+  }
+
+  private WatchlistsResponse getAllWatchlists() {
+    EntityExchangeResult<WatchlistsResponse> result = webTestClient.get()
+        .uri("/watchlists")
+        .exchange()
+        .expectStatus().isOk()
+        .expectBody(WatchlistsResponse.class)
+        .returnResult();
+    return result.getResponseBody();
   }
 
   private void deleteAllWatchlists() {

@@ -2,6 +2,7 @@ package io.sylon.wealth.controller;
 
 import io.sylon.wealth.model.dto.CreateWatchlistDto;
 import io.sylon.wealth.model.dto.CreateWatchlistResponse;
+import io.sylon.wealth.model.dto.UpdateWatchlistDto;
 import io.sylon.wealth.model.dto.WatchlistDetailResponse;
 import io.sylon.wealth.model.dto.WatchlistsResponse;
 import io.sylon.wealth.service.WatchlistService;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,6 +49,12 @@ public class WatchlistController {
     return watchlistService.createWatchlist(principal.getName(), createWatchlistDto);
   }
 
+  @PutMapping ("/watchlists/{id}")
+  @ResponseStatus (HttpStatus.OK)
+  public ResponseEntity<?> updateWatchlist(@PathVariable String id, @RequestBody UpdateWatchlistDto updateWatchlistDto, Principal principal) {
+    watchlistService.updateWatchlistById(principal.getName(), id, updateWatchlistDto);
+    return ResponseEntity.ok().build();
+  }
   @DeleteMapping ("/watchlists/{id}")
   @ResponseStatus (HttpStatus.NO_CONTENT)
   public ResponseEntity<?> deleteWatchlist(@PathVariable String id, Principal principal) {
