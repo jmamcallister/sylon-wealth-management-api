@@ -207,6 +207,17 @@ class WealthManagementApiApplicationTests {
   }
 
   @Test
+  void watchlist_update_givenNoData_shouldReturnBadRequest() throws Exception {
+    deleteAllWatchlists();
+    String id = getDefaultWatchlistId();
+    webTestClient.put()
+        .uri("/watchlists/{id}", id)
+        .body(Mono.just(UpdateWatchlistDto.builder().build()), UpdateWatchlistDto.class)
+        .exchange()
+        .expectStatus().isBadRequest();
+  }
+
+  @Test
   void watchlist_delete_givenExistingWatchlist_shouldReturnNoContent() throws Exception {
     deleteAllWatchlists();
     WatchlistsResponse watchlistsResponse = getAllWatchlists();
@@ -253,6 +264,18 @@ class WealthManagementApiApplicationTests {
         .expectBody(WatchlistsResponse.class)
         .returnResult();
     return result.getResponseBody();
+  }
+
+  private String getDefaultWatchlistId() {
+    WatchlistsResponse watchlistsResponse = getAllWatchlists();
+    assertNotNull(watchlistsResponse);
+    List<WatchlistDto> watchlists = watchlistsResponse.getWatchlists();
+    assertNotNull(watchlists);
+    assertFalse(watchlists.isEmpty());
+    assertEquals(1, watchlists.size());
+    String id = watchlists.get(0).getId();
+    assertNotNull(id);
+    return id;
   }
 
   private void deleteAllWatchlists() {
