@@ -1,5 +1,6 @@
 package io.sylon.wealth.service;
 
+import io.sylon.wealth.exception.WatchlistSymbolNotFoundException;
 import io.sylon.wealth.model.core.Watchlist;
 import io.sylon.wealth.model.dto.CreateWatchlistDto;
 import io.sylon.wealth.model.dto.CreateWatchlistResponse;
@@ -57,6 +58,13 @@ public class WatchlistService {
 
   public void deleteWatchlistById(String user, String id) {
     repository.removeWatchlist(user, id);
+  }
+
+  public void deleteSymbolFromWatchlist(String user, String id, String symbol) {
+    Watchlist watchlist = repository.getWatchlistById(user, id);
+    if (!watchlist.getWatchlistItems().remove(symbol)) {
+      throw new WatchlistSymbolNotFoundException(String.format("No symbol %s found in watchlist id %s", symbol, id));
+    }
   }
 
   private WatchlistDetailResponse mapEntityToDto(Watchlist watchlist) {

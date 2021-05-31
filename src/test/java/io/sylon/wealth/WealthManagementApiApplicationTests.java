@@ -248,12 +248,40 @@ class WealthManagementApiApplicationTests {
 
   @Test
   void watchlist_deleteSymbol_givenExistingWatchlistAndExistingSymbol_shouldReturnNoContent() throws Exception {
+    deleteAllWatchlists();
+    String id = getDefaultWatchlistId();
 
+    webTestClient.put()
+        .uri("/watchlists/{id}", id)
+        .body(Mono.just(UpdateWatchlistDto.builder().symbols(List.of("GME")).build()), UpdateWatchlistDto.class)
+        .exchange()
+        .expectStatus().isOk();
+
+    webTestClient.delete()
+        .uri("/watchlists/{id}/GME", id)
+        .exchange()
+        .expectStatus().isNoContent();
   }
 
   @Test
   void watchlist_deleteSymbol_givenNonExistingWatchlist_shouldReturnNotFound() throws Exception {
+    webTestClient.delete()
+        .uri("/watchlists/{id}/{symbol}", "fake", "also_fake")
+        .exchange()
+        .expectStatus().isNotFound();
+  }
 
+  @Test
+  void watchlist_deleteSymbol_givenExistingWatchlistAndNonExistentSymbol_shouldReturnNotFound() throws Exception {
+    deleteAllWatchlists();
+    String id = getDefaultWatchlistId();
+
+    webTestClient.delete()
+        .uri("/watchlists/{id}/GME", id)
+        .exchange()
+        .expectStatus().isNotFound()
+        .expectBody()
+        .jsonPath("$.errorMessage").isEqualTo(String.format("No symbol %s found in watchlist id %s", "GME", id));
   }
 
   private WatchlistsResponse getAllWatchlists() {

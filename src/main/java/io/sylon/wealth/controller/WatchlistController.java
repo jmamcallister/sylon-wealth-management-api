@@ -64,4 +64,11 @@ public class WatchlistController {
     watchlistService.deleteWatchlistById(principal.getName(), id);
     return ResponseEntity.noContent().build();
   }
+
+  @DeleteMapping ("/watchlists/{id}/{symbol}")
+  @ResponseStatus (HttpStatus.NO_CONTENT)
+  public ResponseEntity<?> deleteSymbolFromWatchlist(@PathVariable String id, @PathVariable String symbol, Principal principal) {
+    watchlistService.deleteSymbolFromWatchlist(principal.getName(), id, symbol);
+    return ResponseEntity.noContent().build();
+  }
 }

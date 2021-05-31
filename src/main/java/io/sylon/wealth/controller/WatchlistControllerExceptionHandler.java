@@ -2,6 +2,7 @@ package io.sylon.wealth.controller;
 
 import io.sylon.wealth.exception.DuplicateWatchlistNameException;
 import io.sylon.wealth.exception.WatchlistNotFoundException;
+import io.sylon.wealth.exception.WatchlistSymbolNotFoundException;
 import io.sylon.wealth.model.dto.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,7 +28,7 @@ public class WatchlistControllerExceptionHandler {
   }
 
   @ResponseStatus (HttpStatus.NOT_FOUND)
-  @ExceptionHandler (WatchlistNotFoundException.class)
+  @ExceptionHandler ({WatchlistNotFoundException.class, WatchlistSymbolNotFoundException.class})
   public ErrorResponse handleWatchlistNotFoundException(Exception e) {
     log.error(e.getMessage());
     return ErrorResponse.builder()
