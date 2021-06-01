@@ -1,9 +1,10 @@
 package io.sylon.wealth.controller;
 
 import io.sylon.wealth.exception.DuplicateWatchlistNameException;
+import io.sylon.wealth.exception.UnknownServerErrorException;
 import io.sylon.wealth.exception.WatchlistNotFoundException;
 import io.sylon.wealth.exception.WatchlistSymbolNotFoundException;
-import io.sylon.wealth.model.dto.ErrorResponse;
+import io.sylon.wealth.model.backend.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -34,6 +35,16 @@ public class WatchlistControllerExceptionHandler {
     return ErrorResponse.builder()
         .error(HttpStatus.NOT_FOUND.getReasonPhrase())
         .errorMessage(Optional.ofNullable(e.getMessage()).orElse("Resource not found"))
+        .build();
+  }
+
+  @ResponseStatus (HttpStatus.INTERNAL_SERVER_ERROR)
+  @ExceptionHandler (UnknownServerErrorException.class)
+  public ErrorResponse handleServerErrorException(Exception e) {
+    log.error(e.getMessage());
+    return ErrorResponse.builder()
+        .error(HttpStatus.NOT_FOUND.getReasonPhrase())
+        .errorMessage(Optional.ofNullable(e.getMessage()).orElse("An internal server error occurred"))
         .build();
   }
 }

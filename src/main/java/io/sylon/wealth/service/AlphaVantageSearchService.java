@@ -2,14 +2,8 @@ package io.sylon.wealth.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.sylon.wealth.exception.BackendErrorMessageException;
-import io.sylon.wealth.exception.BackendInformationException;
-import io.sylon.wealth.exception.BackendRateLimitExceededException;
 import io.sylon.wealth.exception.BackendUnexpectedException;
-import io.sylon.wealth.model.dto.BackendErrorMessageResponse;
-import io.sylon.wealth.model.dto.BackendInformationResponse;
 import io.sylon.wealth.model.dto.BackendMatch;
-import io.sylon.wealth.model.dto.BackendNoteResponse;
 import io.sylon.wealth.model.dto.BackendSearchResponse;
 import io.sylon.wealth.model.dto.SearchResponse;
 import io.sylon.wealth.model.dto.SearchResult;
@@ -23,7 +17,7 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class AlphaVantageSearchService implements SearchService {
+public class AlphaVantageSearchService extends AbstractAlphaVantageService implements SearchService {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final WebClient webClient;
@@ -47,38 +41,6 @@ public class AlphaVantageSearchService implements SearchService {
     checkForInformationResponse(response);
 
     return mapResponse(response);
-  }
-
-  /*
-   * Assumption here is that a response with JSON key 'Note'
-   * means the rate limit has been exceeded for the backend
-   * API service level
-   */
-  private void checkForNoteResponse(String response) {
-    try {
-      BackendNoteResponse noteResponse = objectMapper.readValue(response, BackendNoteResponse.class);
-      throw new BackendRateLimitExceededException(noteResponse.getNote());
-    } catch (JsonProcessingException e) {
-      log.debug("JSON key 'Note' not found in response");
-    }
-  }
-
-  private void checkForErrorMessageResponse(String response) {
-    try {
-      BackendErrorMessageResponse errorMessageResponse = objectMapper.readValue(response, BackendErrorMessageResponse.class);
-      throw new BackendErrorMessageException(errorMessageResponse.getErrorMessage());
-    } catch (JsonProcessingException e) {
-      log.debug("JSON key 'Error Message' not found in response");
-    }
-  }
-
-  private void checkForInformationResponse(String response) {
-    try {
-      BackendInformationResponse informationResponse = objectMapper.readValue(response, BackendInformationResponse.class);
-      throw new BackendInformationException(informationResponse.getInformation());
-    } catch (JsonProcessingException e) {
-      log.debug("JSON key 'Information' not found in response");
-    }
   }
 
   private SearchResponse mapResponse(String response) {

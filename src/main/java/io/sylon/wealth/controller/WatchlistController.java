@@ -4,6 +4,7 @@ import io.sylon.wealth.model.dto.CreateWatchlistDto;
 import io.sylon.wealth.model.dto.CreateWatchlistResponse;
 import io.sylon.wealth.model.dto.UpdateWatchlistDto;
 import io.sylon.wealth.model.dto.WatchlistDetailResponse;
+import io.sylon.wealth.model.dto.WatchlistQuotesDto;
 import io.sylon.wealth.model.dto.WatchlistsResponse;
 import io.sylon.wealth.service.WatchlistService;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,11 @@ public class WatchlistController {
   @GetMapping ("/watchlists/{id}")
   public WatchlistDetailResponse getWatchlistById(@PathVariable String id,  Principal principal) {
     return watchlistService.getWatchlistById(principal.getName(), id);
+  }
+
+  @GetMapping ("/watchlists/{id}/quotes")
+  public WatchlistQuotesDto getWatchlistQuotes(@PathVariable String id, Principal principal) {
+    return watchlistService.getWatchlistQuotes(principal.getName(), id);
   }
 
   @PostMapping ("/watchlists")

@@ -1,4 +1,4 @@
-package io.sylon.wealth.model.dto;
+package io.sylon.wealth.model.backend;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class WatchlistItemDto {
+public class QuoteResponse {
 
   private String symbol;
-  private String name;
+  private String price;
 }

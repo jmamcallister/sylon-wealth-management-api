@@ -2,6 +2,8 @@ package io.sylon.wealth.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.sylon.wealth.model.backend.alphavantage.BackendQuoteResponse;
+import io.sylon.wealth.model.backend.alphavantage.GlobalQuote;
 import io.sylon.wealth.model.dto.BackendMatch;
 import io.sylon.wealth.model.dto.BackendNoteResponse;
 import io.sylon.wealth.model.dto.BackendSearchResponse;
@@ -28,6 +30,16 @@ public class TestData {
   public static BackendNoteResponse tooManyRequestsResponse() {
     return BackendNoteResponse.builder()
         .note("5 per minute, 500 per day")
+        .build();
+  }
+
+  public static BackendQuoteResponse singleBackendQuoteResponse(String symbol, String price) {
+    GlobalQuote globalQuote = GlobalQuote.builder()
+        .symbol(symbol)
+        .price(price)
+        .build();
+    return BackendQuoteResponse.builder()
+        .globalQuote(globalQuote)
         .build();
   }
 }

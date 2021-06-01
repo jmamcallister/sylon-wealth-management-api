@@ -2,7 +2,7 @@ package io.sylon.wealth.controller;
 
 import io.sylon.wealth.exception.BackendErrorMessageException;
 import io.sylon.wealth.exception.BackendRateLimitExceededException;
-import io.sylon.wealth.model.dto.ErrorResponse;
+import io.sylon.wealth.model.backend.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;

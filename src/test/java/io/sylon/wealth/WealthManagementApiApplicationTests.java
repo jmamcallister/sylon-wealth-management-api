@@ -24,6 +24,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static io.sylon.wealth.util.TestData.json;
+import static io.sylon.wealth.util.TestData.singleBackendQuoteResponse;
 import static io.sylon.wealth.util.TestData.singleBackendSearchResponse;
 import static io.sylon.wealth.util.TestData.tooManyRequestsResponse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -162,6 +163,39 @@ class WealthManagementApiApplicationTests {
         .jsonPath("$.name").isEqualTo("default")
         .jsonPath("$.symbols").isArray()
         .jsonPath("$.symbols").isEmpty();
+  }
+
+  @Test
+  void watchlist_refresh_givenWatchlistWithSymbols_shouldReturnDetails() throws Exception {
+    stubFor(get(urlPathEqualTo("/query"))
+        .withQueryParam("function", equalTo("GLOBAL_QUOTE"))
+        .withQueryParam("symbol", equalTo("ACME"))
+        .willReturn(aResponse().withStatus(HttpStatus.OK.value()).withBody(json(singleBackendQuoteResponse("ACME", "100.00"))))
+    );
+    stubFor(get(urlPathEqualTo("/query"))
+        .withQueryParam("function", equalTo("GLOBAL_QUOTE"))
+        .withQueryParam("symbol", equalTo("GME"))
+        .willReturn(aResponse().withStatus(HttpStatus.OK.value()).withBody(json(singleBackendQuoteResponse("GME", "200.00"))))
+    );
+
+    deleteAllWatchlists();
+    String id = getDefaultWatchlistId();
+
+    webTestClient.put()
+        .uri("/watchlists/{id}", id)
+        .body(Mono.just(UpdateWatchlistDto.builder().symbols(List.of("GME", "ACME")).build()), UpdateWatchlistDto.class)
+        .exchange()
+        .expectStatus().isOk();
+
+    webTestClient.get()
+        .uri("/watchlists/{id}/quotes", id)
+        .exchange()
+        .expectStatus().isOk()
+        .expectBody()
+        .jsonPath("$.quotes").isArray()
+        .jsonPath("$.quotes.length()").isEqualTo(2)
+        .jsonPath("$.quotes[0].symbol").isNotEmpty()
+        .jsonPath("$.quotes[0].price").isNotEmpty();
   }
 
   @Test
