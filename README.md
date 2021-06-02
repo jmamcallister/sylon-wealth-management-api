@@ -92,6 +92,13 @@ to take a simpler modelling approach with the WebClient itself and grab everythi
 then perform our own "manual" marshalling of the JSON object and interrogating the response
 to decide on the next step.
 
+I would have liked to provide the facility for users to easily register themselves and create Basic
+Auth credentials, however since there is only minimal security, no built-in rate limiting, and the
+cloud hosting provider was not chosen till later (which may provide rate-limiting), the user credentials
+are hard-coded and thus visible in the source code, and also requires a rebuild and redeploy
+for new credentials to be added (and reaching out to the developer to request new credentials).
+Not great for a demo scenario, but it should suffice.
+
 ## Wishlist
 
 What to implement/improve with more time:
@@ -112,4 +119,7 @@ What to implement/improve with more time:
   Object Relational Mapper)
 * Version the APIs, most likely with a "version" in the path, e.g. `/api/v1/resource` (content
   negotiation based on vendor-specific headers might also be investigated)
-* More custom validators to define API responses to bad requests with helpful messages  
+* More custom validators to define API responses to bad requests with helpful messages
+* Conditional deployment of service implementations, e.g., ability to deploy "Alpha Vantage"
+  backend implementation, or some other backend implementation with just configuration
+  parameter (crude form of feature toggling)
