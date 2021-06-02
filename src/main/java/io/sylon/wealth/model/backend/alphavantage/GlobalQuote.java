@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GlobalQuote {
 
-  @JsonProperty("1. symbol")
+  @JsonProperty("01. symbol")
   private String symbol;
-  @JsonProperty("5. price")
+  @JsonProperty("05. price")
   private String price;
 }
