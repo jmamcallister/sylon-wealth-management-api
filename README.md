@@ -39,7 +39,7 @@ mvn springboot:run -Dapp.backend.url=http://localhost:8081
 
 ## Test
 
-Swagger UI available at <>
+Swagger UI available at http://sylondemo-env.eba-iuk4hjc4.eu-west-1.elasticbeanstalk.com/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config
 
 Swagger also locally available at http://localhost:8080/swagger-ui.html if running on
 standard Springboot configuration.
