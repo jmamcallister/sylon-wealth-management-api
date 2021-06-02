@@ -64,6 +64,7 @@ public class WatchlistController {
     watchlistService.updateWatchlistById(principal.getName(), id, updateWatchlistDto);
     return ResponseEntity.ok().build();
   }
+
   @DeleteMapping ("/watchlists/{id}")
   @ResponseStatus (HttpStatus.NO_CONTENT)
   public ResponseEntity<?> deleteWatchlist(@PathVariable String id, Principal principal) {
