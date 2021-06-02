@@ -46,6 +46,17 @@ standard Springboot configuration.
 
 Credentials available on request.
 
+A typical flow:
+
+* GET /search?query=<stock or company name>
+  * Note symbols of interesting stocks
+* GET /watchlists
+  * Note id values of watchlist(s)
+* PUT /watchlists/:id
+  * Add symbol(s) to your watchlist
+* GET /watchlists/:id/quotes
+  * Get daily quote for all stocks in watchlist
+
 ## Design
 
 ### Search
