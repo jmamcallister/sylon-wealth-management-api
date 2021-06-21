@@ -134,3 +134,23 @@ What to implement/improve with more time:
 * Conditional deployment of service implementations, e.g., ability to deploy "Alpha Vantage"
   backend implementation, or some other backend implementation with just configuration
   parameter (crude form of feature toggling)
+
+## NextGen Platform
+
+### Abstract
+
+Provide historical data for stock symbols in user's wishlists, and manage deployment, ingress, scaling, monitoring with Kubernetes
+* Create new service to periodically fetch market information from 3rd Party service for all symbols in all watchlists
+* Execute fetching via Kubernetes CronJob
+* Persist market data as time-series in new data model (date, open-high-low-close, see Proposed Data Model)
+* Possibly switch getting "latest" data from directly querying 3rd Party service to querying latest entry in new data model
+* Endpoint for "get latest" can be extended to accept query parameters, e.g., "from=<from_date>&to=<to_date>"
+
+### Proposed Data Model
+
+* Date
+* Symbol
+* Price at open
+* Price at close
+* Highest price
+* Lowest price
